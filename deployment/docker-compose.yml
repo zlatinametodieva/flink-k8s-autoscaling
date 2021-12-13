@@ -1,0 +1,36 @@
+version: '2'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+
+  kafka:
+    build: .
+    ports:
+      - "9092:9092"
+    environment:
+      DOCKER_API_VERSION: 1.22
+      KAFKA_ADVERTISED_HOST_NAME:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_TRANSACTION_MAX_TIMEOUT_MS: 9000000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - /tmp/redis-persistence:/data
